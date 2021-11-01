@@ -1,29 +1,27 @@
+# The file implements Konane (Hawaiian Checkers)
+# @author: Linh Tran
+# @date: Oct 31, 2021
+
 import random
 import copy
 
 
 class GameError(AttributeError):
     """
-    This class is used to indicate a problem in the konane game.
+    This class is used to raise an error during Konane game.
     """
 
 
 class Konane:
     """
-    This class implements Konane, the Hawaiian version of checkers.
-    The board is represented as a two-dimensional list.  Each
-    location on the board contains one of the following symbols:
-       'X' for a black piece
-       'O' for a white piece
-       '.' for an empty location
-    The X player always goes first.  The opening moves by both
-    players are special cases and involve removing one piece from
-    specific designated locations.  Subsequently, each move is a
-    jump over one of the opponent's pieces into an empty location.
-    The jump may continue in the same direction, if appropriate.
-    The jumped pieces are removed, and then it is the opponent's
-    turn.  Play continues until one player has no possible moves,
-    making the other player the winner.
+    This class implements Konane and its rule, using a 2D list as the game state (board) representation.
+    On the board:
+       'X': black
+       'O': white
+       '.': empty
+    X always goes first.  In the board 8x8, the first move (by X) is to remove (4, 4), and the second move
+    (by O) is to remove (4, 5). Following the rule of Konane, the game stops when either X or O has no next
+    possible move. The winner/loser is then printed.
     """
 
     def __init__(self, n):
@@ -46,6 +44,9 @@ class Konane:
                 value = self.opponent(value)
 
     def __str__(self):
+        """
+        Converts the board state into string to print out.
+        """
         result = "  "
         for i in range(self.size):
             result += str(i+1) + " "
@@ -59,21 +60,20 @@ class Konane:
 
     def valid(self, row, col):
         """
-        Returns true if the given row and col represent a valid location on
-        the konane board.
+        Returns true if the given row and col is a valid location, false otherwise
         """
         return row >= 0 and col >= 0 and row < self.size and col < self.size
 
     def contains(self, board, row, col, symbol):
         """
-        Returns true if the given row and col represent a valid location on
-        the konane board and that location contains the given symbol.
+        Returns true if the given row and col represent a valid location that 
+        contains the passed-in symbol.
         """
         return self.valid(row, col) and board[row][col] == symbol
 
     def countSymbol(self, board, symbol):
         """
-        Returns the number of instances of the symbol on the board.
+        Returns the number of instances of the passed-in symbol on the board.
         """
         count = 0
         for r in range(self.size):
@@ -84,8 +84,7 @@ class Konane:
 
     def opponent(self, player):
         """
-        Given a player symbol, returns the opponent's symbol, 'B' for black,
-        or 'W' for white.
+        Returns the opponent of the passed-in player.
         """
         if player == 'X':
             return 'O'
@@ -95,8 +94,7 @@ class Konane:
     def distance(self, r1, c1, r2, c2):
         """
         Returns the distance between two points in a vertical or
-        horizontal line on the konane board. Diagonal jumps are NOT
-        allowed.
+        horizontal line on the konane board. 
         """
         return abs(r1-r2 + c1-c2)
 
@@ -420,10 +418,9 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
         moves = self.generateMoves(board, side)
 
         # if reached the depth limit, return evaluation function of board
-        # and the move at its previous depth
+        # and the move is null
         if self.limit == depth:
             return [self.evaluation(board), None]
-            # return [self.evaluation(board), self.getMove(board)]
 
         # if we're out of possible moves, we lose
         if len(moves) == 0:
@@ -455,82 +452,6 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
                 if beta <= alpha:  # cut-off
                     return [alpha, best_move]
                 return [beta, best_move]
-
-    # def minimaxAlphaBeta(self, board, depth, isMax, side, alpha, beta):
-    #     # list of all possible moves
-    #     moves = self.generateMoves(board, side)
-
-    #     # if reached the depth limit, return evaluation function of board
-    #     # and the move at its previous depth
-    #     if self.limit == depth:
-    #         return [self.evaluation(board), None]
-
-    #     val, move = [float("inf"), None]
-    #     # if we're out of possible moves, we lose
-    #     if len(moves) == 0:
-    #         return [float("inf"), None]
-
-    #     if not isMax:
-    #         val, move = self.min_value(board, depth, side, alpha, beta)
-    #     else:
-    #         val, move = self.max_value(board, depth, side, alpha, beta)
-    #     return [val, move]
-
-    # def max_value(self, board, depth, side, alpha, beta):
-    #     # list of all possible moves
-    #     moves = self.generateMoves(board, side)
-
-    #     # if reached the depth limit, return evaluation function of board
-    #     # and the move at its previous depth
-    #     if self.limit == depth:
-    #         return [self.evaluation(board), None]
-    #         # return [self.evaluation(board), self.getMove(board)]
-
-    #     # if we're out of possible moves, we lose
-    #     if len(moves) == 0:
-    #         return [-float("inf"), None]
-
-    #     val, act = -float("inf"), None
-
-    #     for move in moves:
-    #         # val2, act2 = self.min_value(self.nextBoard(
-    #         #     board, side, move), depth+1, self.opponent(self.side), alpha, beta)
-    #         val2, act2 = self.minimaxAlphaBeta(self.nextBoard(
-    #             board, side, move), depth+1, False, self.opponent(self.side), alpha, beta)
-    #         if val2 > val:
-    #             val, act = val2, move
-    #             alpha = max(alpha, val)
-    #         if val >= beta:
-    #             return val, act
-    #     return val, act
-
-    # def min_value(self, board, depth, side, alpha, beta):
-    #     # list of all possible moves
-    #     moves = self.generateMoves(board, side)
-
-    #     # if reached the depth limit, return evaluation function of board
-    #     # and the move at its previous depth
-    #     if self.limit == depth:
-    #         return [self.evaluation(board), None]
-    #         # return [self.evaluation(board), self.getMove(board)]
-
-    #     # if we're out of possible moves, we lose
-    #     if len(moves) == 0:
-    #         return [float("inf"), None]
-
-    #     val, act = float("inf"), None
-
-    #     for move in moves:
-    #         # val2, act2 = self.max_value(self.nextBoard(
-    #         #     board, side, move), depth+1, self.side, alpha, beta)
-    #         val2, act2 = self.minimaxAlphaBeta(self.nextBoard(
-    #             board, side, move), depth+1, True, self.opponent(self.side), alpha, beta)
-    #         if val2 < val:
-    #             val, act = val2, move
-    #             beta = min(beta, val)
-    #         if val <= alpha:
-    #             return val, act
-    #     return val, act
 
     def evaluation(self, board):
         moves = self.generateMoves(board, self.side)
