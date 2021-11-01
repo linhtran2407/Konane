@@ -1,6 +1,7 @@
 # The file implements Konane (Hawaiian Checkers)
 # @author: Linh Tran
 # @date: Oct 31, 2021
+# reference the code from: https://www.cs.swarthmore.edu/~meeden/cs63/f05/konane.py
 
 import random
 import copy
