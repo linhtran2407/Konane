@@ -598,6 +598,7 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
 
 game = Konane(8)
 # game.playNGames(9, RandomPlayer(8), RandomPlayer(8), False)
+print("------------------------------------------------------------")
 game.playOneGame(MinimaxPlayer(8, 2), RandomPlayer(8), True)
 print("------------------------------------------------------------")
 game.playOneGame(MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
