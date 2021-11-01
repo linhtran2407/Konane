@@ -1,25 +1,13 @@
 import random
 import copy
 
-"""
-The file implements Konane (Hawaiian Checkers)
-@author: Linh Tran
-@date: Oct 31, 2021
-Reference source: https://www.cs.swarthmore.edu/~meeden/cs63/f05/konane.py
-"""
 
-
-class GameError(AttributeError):
-    """
-    This class is used to raise an error during Konane game.
-    """
-
-class Konane:
+class KonaneBoard:
     def __init__(self, size):
         self.size = size
-        self.resetGameState()
+        self.resetGame()  # create a starting board state
 
-    def resetGameState(self):
+    def resetGame(self):
         """
         Resets the starting board state.
         """
@@ -48,7 +36,7 @@ class Konane:
     def isValidMove(self, move):
         """
         Returns true if the given row and col represent a valid location on
-        the Konane board.
+        the KonaneBoard board.
         """
         row = move[0]
         col = move[1]
@@ -57,7 +45,7 @@ class Konane:
     def contains(self, board, row, col, symbol):
         """
         Returns true if the given row and col represent a valid location on
-        the Konane board and that location contains the given symbol.
+        the KonaneBoard board and that location contains the given symbol.
         """
         return self.isValidMove((row, col)) and board[row][col] == symbol
 
@@ -88,8 +76,8 @@ class Konane:
     def nextBoard(self, board, player, move):
         """
         Given a move for a particular player from (r1,c1) to (r2,c2) this
-        executes the move on a copy of the current Konane board.  It will
-        raise a KonaneError if the move is invalid. It returns the copy of
+        executes the move on a copy of the current KonaneBoard board.  It will
+        raise a KonaneBoardError if the move is invalid. It returns the copy of
         the board, and does not change the given board.
         """
         r1, c1, r2, c2 = int(move[0]), int(move[1]), int(move[2]), int(move[3])
@@ -170,49 +158,61 @@ class Konane:
                                                 self.opponent(player))
             return moves
 
-    def playOneGame(self, p1, p2, showGameState):
+    def playOneGame(self, player1, player2, show):
         """
-        Play out a game between p1 and p2.  Returns 'X' if p1 wins, or 'O' if
-        p2 wins. When showGameState is true, it will display each state
+        Given two instances of players, will play out a game
+        between them.  Returns 'X' if black wins, or 'O' if
+        white wins. When show is true, it will display each move
         in the game.
         """
-        self.resetGameState()
-        p1.initialize('X')
-        p2.initialize('O')
-        print(p1.name, "vs", p2.name)
-
+        self.resetGame()
+        player1.initialize('X')
+        player2.initialize('O')
+        print(player1.name, "vs", player2.name)
         while True:
-            if showGameState:
+            if show:
                 print(self)
-                print("player X's turn")
-            move = p1.getMove(self.board)
+                # self.printBoard()
+                print("player B's turn")
+            move = player1.getMove(self.board)
             if move == []:
-                print("Game over", p2.name, "wins")
+                print("Game over", player1.name, "loses")
                 return 'O'
             try:
                 self.makeMove('X', move)
-            except GameError:
-                print("Game over: Invalid move by", p1.name)
+            except AttributeError:
+                print("Game over: Invalid move by", player1.name)
                 print(move)
                 print(self)
+                # self.printBoard()
                 return 'O'
-            if showGameState:
+            if show:
+                # print(move)
+                # for m in move:
+                #     m = [x+1 for x in m]
+                move = [x + 1 for x in move]
                 print(move)
                 print
                 print(self)
-                print("player O's turn")
-            move = p2.getMove(self.board)
+                # self.printBoard()
+                print("player W's turn")
+            move = player2.getMove(self.board)
             if move == []:
-                print("Game over", p1.name, "wins")
+                print("Game over", player2.name, "loses")
                 return 'X'
             try:
                 self.makeMove('O', move)
-            except GameError:
-                print("Game over: Invalid move by", p2.name)
+            except AttributeError:
+                print("Game over: Invalid move by", player2.name)
+                # for m in move:
+                #     m = [x+1 for x in move[m]]
+                move = [x + 1 for x in move]
                 print(move)
                 print(self)
+                # self.printBoard()
                 return 'X'
-            if showGameState:
+            if show:
+                move = [x + 1 for x in move]
                 print(move)
                 print
 
@@ -264,11 +264,25 @@ class Player:
     def won(self):
         self.wins += 1
 
-    def resetGameState(self):
+    def resetGame(self):
         self.wins = 0
         self.losses = 0
 
-class RandomPlayer(Konane, Player):
+    def initialize(self, player):
+        """
+        Records the player's player, either 'X' for black or
+        'O' for white.  Should also set the name of the player.
+        """
+        abstract()
+
+    def getMove(self, board):
+        """
+        Given the current board, should return a valid move.
+        """
+        abstract()
+
+
+class RandomPlayer(KonaneBoard, Player):
     """
     Chooses a random move from the set of possible moves.
     """
@@ -286,7 +300,7 @@ class RandomPlayer(Konane, Player):
             return random.choice(moves)
 
 
-class HumanPlayer(Konane, Player):
+class HumanPlayer(KonaneBoard, Player):
     """
     Prompts a human player for a move.
     """
@@ -322,9 +336,9 @@ class HumanPlayer(Konane, Player):
                 print("Invalid move, try again.")
 
 
-class MinimaxPlayer(Konane, Player):
+class MinimaxPlayer(KonaneBoard, Player):
     def __init__(self, size, depth_limit):
-        Konane.__init__(self, size)
+        KonaneBoard.__init__(self, size)
         self.depth_limit = depth_limit
 
     def initialize(self, player):
@@ -399,9 +413,9 @@ class MinimaxPlayer(Konane, Player):
             return current_backedup_val, best_move
 
 
-class MinimaxPlayerAlphaBeta(Konane, Player):
+class MinimaxPlayerAlphaBeta(KonaneBoard, Player):
     def __init__(self, size, depth_limit):
-        Konane.__init__(self, size)
+        KonaneBoard.__init__(self, size)
         self.depth_limit = depth_limit
 
     def initialize(self, player):
@@ -477,10 +491,10 @@ class MinimaxPlayerAlphaBeta(Konane, Player):
             return beta, best_move
 
 
-game = Konane(8)
-game.playNGames(3, MinimaxPlayerAlphaBeta(8, 2), MinimaxPlayerAlphaBeta(8, 1), 0)
+game = KonaneBoard(8)
 print("------------------------------------------------------------")
-# game.playNGames(4, MinimaxPlayer(8, 6), MinimaxPlayer(8, 5), 1)
-print("------------------------------------------------------------")
-game.playNGames(3, MinimaxPlayer(8, 5), MinimaxPlayerAlphaBeta(8, 2), 0)
-# game.playOneGame(HumanPlayer(8), HumanPlayer(8), True)
+# game.playNGames(3, MinimaxPlayer(8, 5), MinimaxPlayerAlphaBeta(8, 2), 0)
+# game.playNGames(3, MinimaxPlayer(8, 5), MinimaxPlayer(8, 2), 0)
+# game.playNGames(3, MinimaxPlayerAlphaBeta(8, 4), RandomPlayer(8), False)
+
+game.playNGames(3, MinimaxPlayer(8, 4), RandomPlayer(8), False)

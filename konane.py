@@ -270,11 +270,16 @@ class Konane:
                 print(second.name, "wins")
             first, second = second, first
 
+    def isTerminal(self, moves):
+        if len(moves) == 0:
+            return True
+        return False
+
 
 class Player:
     """
-    A base class for Konane players.  All players must implement
-    the the initialize and getMove methods.
+    Parent class for all below Konane players. All players must implement
+    the initialize() and getMove() methods.
     """
     name = "Player"
     wins = 0
@@ -359,10 +364,83 @@ class HumanPlayer(Konane, Player):
                 print("Invalid choice, try again.")
 
 
+# class MinimaxPlayer(Konane, Player):
+#     """
+#     This class implements a minimax player.
+#     """
+#     def __init__(self, size, depth_limit):
+#         Konane.__init__(self, size)
+#         self.limit = depth_limit
+
+#     def initialize(self, current_player):
+#         self.current_player = current_player
+#         self.name = "Minimax_limit_" + str(self.limit)
+
+#     def getMove(self, board):
+#         # Possible moves
+#         moves = self.generateMoves(board, self.current_player)
+#         best_val = -float("inf")
+#         best_index = 0
+#         index = 0
+
+#         if len(moves) == 0:
+#             return []
+
+#         for move in moves:
+#             backedup_val = (self.minimax(self.nextBoard(
+#                 board, self.current_player, move), 0, self.opponent(self.current_player)))[0]
+#             if backedup_val == None:
+#                 return []
+#             if backedup_val > best_val:
+#                 best_val = backedup_val
+#                 best_index = index
+#             index += 1
+
+#         return moves[best_index]
+
+#     def evaluation(self, board):
+#         moves = self.generateMoves(board, self.current_player)
+#         opponent_moves = self.generateMoves(
+#             board, self.opponent(self.current_player))
+#         if len(opponent_moves) == 0:
+#             return float("inf")
+#         if len(moves) == 0:
+#             return -float("inf")
+#         return len(moves) - len(opponent_moves)
+
+#     def minimax(self, board, depth, current_player):
+#         # possible moves
+#         moves = self.generateMoves(board, current_player)
+
+#         # If reach the depth limit or is terminal node
+#         if depth == self.limit or len(moves) == 0:
+#             return (self.evaluation(board), None)
+
+#         # max node is at even depth, min node is at odd depth
+#         isMax = (depth % 2 == 0)
+
+#         if isMax:
+#             best_move = 0
+#             curr_backedup_val = -float("inf")
+#             for move in moves:
+#                 backedup_val = (self.minimax(self.nextBoard(
+#                     board, current_player, move), depth + 1, self.opponent(self.current_player)))[0]
+#                 if backedup_val > curr_backedup_val:
+#                     curr_backedup_val = backedup_val
+#                     best_move = move
+#             return curr_backedup_val, best_move
+#         else:
+#             best_move = 0
+#             curr_backedup_val = float("inf")
+#             for move in moves:
+#                 backedup_val = (self.minimax(self.nextBoard(
+#                     board, current_player, move), depth + 1, self.current_player))[0]
+#                 if backedup_val < curr_backedup_val:
+#                     curr_backedup_val = backedup_val
+#                     best_move = move
+#             return curr_backedup_val, best_move
+
 class MinimaxPlayer(Konane, Player):
-    """
-    This class implements a minimax player.
-    """
     def __init__(self, size, depth_limit):
         Konane.__init__(self, size)
         self.limit = depth_limit
@@ -404,39 +482,36 @@ class MinimaxPlayer(Konane, Player):
         return len(moves) - len(opponent_moves)
 
     def minimax(self, board, depth, current_player):
-
-        # Get a list of possible moves given board state
+        # possible moves
         moves = self.generateMoves(board, current_player)
 
-        # Check to see if we've reached the depth limit
-        #   if we have, return eval of board
+        # If reach the depth limit or is terminal node
         if depth == self.limit or len(moves) == 0:
             return (self.evaluation(board), None)
 
-        # Check to see if we're out of possible moves
-        #   if so return inf to indicate a loss
+        # max node is at even depth, min node is at odd depth
         isMax = (depth % 2 == 0)
 
         if isMax:
             best_move = 0
-            curr_backedup_val = -float("inf")
+            current_backedup_val = -float("inf")
             for move in moves:
                 backedup_val = (self.minimax(self.nextBoard(
                     board, current_player, move), depth + 1, self.opponent(self.current_player)))[0]
-                if backedup_val > curr_backedup_val:
-                    curr_backedup_val = backedup_val
+                if backedup_val > current_backedup_val:
+                    current_backedup_val = backedup_val
                     best_move = move
-            return curr_backedup_val, best_move
+            return current_backedup_val, best_move
         else:
             best_move = 0
-            curr_backedup_val = float("inf")
+            current_backedup_val = float("inf")
             for move in moves:
                 backedup_val = (self.minimax(self.nextBoard(
                     board, current_player, move), depth + 1, self.current_player))[0]
-                if backedup_val < curr_backedup_val:
-                    curr_backedup_val = backedup_val
+                if backedup_val < current_backedup_val:
+                    current_backedup_val = backedup_val
                     best_move = move
-            return curr_backedup_val, best_move
+            return current_backedup_val, best_move
 
 
 class MinimaxAlphaBetaPlayer(Konane, Player):
@@ -446,11 +521,11 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
 
     def __init__(self, size, depth_limit):
         Konane.__init__(self, size)
-        self.depth_limit = depth_limit
+        self.limit = depth_limit
 
     def initialize(self, current_player):
         self.current_player = current_player
-        self.name = "MinimaxAB_limit_" + str(self.depth_limit)
+        self.name = "MinimaxAB_limit_" + str(self.limit)
 
     def getMove(self, board):
         moves = self.generateMoves(board, self.current_player)
@@ -487,14 +562,14 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
         return len(moves) - len(opponent_moves)
 
     def minimaxAlphaBeta(self, board, depth, current_player, alpha, beta):
-        # Get a list of possible moves given board state
+        # possible moves
         moves = self.generateMoves(board, current_player)
 
-        # Check to see if we've reached the depth limit
-        # if we have, return eval of board
-        if depth == self.depth_limit or len(moves) == 0:
+        # If reach the depth limit or is terminal node
+        if depth == self.limit or len(moves) == 0:
             return (self.evaluation(board), None)
 
+        # max node is at even depth, min node is at odd depth
         isMax = (depth % 2 == 0)
 
         if isMax:
@@ -513,7 +588,7 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
             for move in moves:
                 backedup_val = (self.minimaxAlphaBeta(self.nextBoard(
                     board, current_player, move), depth + 1, self.current_player, alpha, beta))[0]
-                if backedup_val > beta:
+                if backedup_val < beta:
                     beta = backedup_val
                     best_move = move
                 if alpha >= beta:
@@ -523,17 +598,14 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
 
 game = Konane(8)
 # game.playNGames(9, RandomPlayer(8), RandomPlayer(8), False)
-# game.playOneGame(RandomPlayer(8), RandomPlayer(8), True)
-# game.playOneGame(MinimaxPlayer(8, 2), RandomPlayer(8), True)
-# game.playNGames(5, MinimaxPlayer(8, 2), MinimaxPlayer(8, 4), False)
-# game.playNGames(5, MinimaxPlayer(8, 2), RandomPlayer(8), False)
-# game.playOneGame(HumanPlayer(8), RandomPlayer(8), True)
-# game.playOneGame(HumanPlayer(8), HumanPlayer(8), True)
-# game.playNGames(2, MinimaxAlphaBetaPlayer(8, 2), HumanPlayer(8), True)
-# game.playNGames(9, MinimaxAlphaBetaPlayer(8, 4), MinimaxAlphaBetaPlayer(8, 2), False)
-# game.playNGames(9, MinimaxPlayer(8, 4), MinimaxAlphaBetaPlayer(8, 2), False)
-# game.playNGames(9, MinimaxAlphaBetaPlayer(8, 4), MinimaxAlphaBetaPlayer(8, 2), False)
-
+game.playOneGame(MinimaxPlayer(8, 2), RandomPlayer(8), True)
 print("------------------------------------------------------------")
-# game.playOneGame(MinimaxAlphaBetaPlayer(8, 2), MinimaxAlphaBetaPlayer(8, 1), True)
-game.playNGames(9, MinimaxPlayer(8, 4), MinimaxAlphaBetaPlayer(8, 1), False)
+game.playOneGame(MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
+# game.playOneGame(MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
+print("------------------------------------------------------------")
+game.playNGames(3, MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
+print("------------------------------------------------------------")
+game.playNGames(3, MinimaxPlayer(8, 4), RandomPlayer(8), False)
+
+# game.playNGames(2, MinimaxAlphaBetaPlayer(8, 2), HumanPlayer(8), True)
+# game.playNGames(2, MinimaxPlayer(8, 2), HumanPlayer(8), True)
