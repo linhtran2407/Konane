@@ -14,6 +14,7 @@ class GameError(AttributeError):
     This class is used to raise an error during Konane game.
     """
 
+
 class Konane:
     """
     This class implements Konane and its rule, using a 2D list as the game state (board) representation.
@@ -68,7 +69,7 @@ class Konane:
 
     def contains(self, board, row, col, symbol):
         """
-        Returns true if the given row and col represent a valid location that 
+        Returns true if the given row and col represent a valid location that
         contains the passed-in symbol.
         """
         return self.isValidLocation(row, col) and board[row][col] == symbol
@@ -85,7 +86,7 @@ class Konane:
     def distance(self, r1, c1, r2, c2):
         """
         Returns the distance between two points in a vertical or
-        horizontal line on the konane board. 
+        horizontal line on the konane board.
         """
         return abs(r1-r2 + c1-c2)
 
@@ -138,7 +139,7 @@ class Konane:
 
     def isOpeningMove(self, board):
         """
-        Returns true if this is the first move, meaning there is only 
+        Returns true if this is the first move, meaning there is only
         at most 1 empty space on the board. Otherwise, return false.
         """
         emptyLocations = 0
@@ -146,7 +147,7 @@ class Konane:
             for col in range(self.size):
                 if board[row][col] == ".":
                     emptyLocations += 1
-                    
+
         return emptyLocations <= 1
 
     def makeFirstMove(self, board):
@@ -276,6 +277,8 @@ class Konane:
         if len(moves) == 0:
             return True
         return False
+
+
 class Player:
     """
     Parent class for all below Konane players. All players must implement
@@ -300,6 +303,7 @@ class Player:
     def reset(self):
         self.wins = 0
         self.losses = 0
+
 
 class RandomPlayer(Konane, Player):
     """
@@ -367,6 +371,7 @@ class HumanPlayer(Konane, Player):
                 return moves[index]
             else:
                 print("Invalid choice, try again.")
+
 
 class MinimaxPlayer(Konane, Player):
     def __init__(self, size, depth_limit):
@@ -544,12 +549,13 @@ class MinimaxAlphaBetaPlayer(Konane, Player):
 
 game = Konane(8)
 # game.playNGames(9, RandomPlayer(8), RandomPlayer(8), False)
-print("------------------------------------------------------------")
-game.playOneGame(MinimaxPlayer(8, 2), RandomPlayer(8), True)
-print("------------------------------------------------------------")
-game.playOneGame(MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
+# print("------------------------------------------------------------")
+game.playOneGame(MinimaxAlphaBetaPlayer(8, 6), HumanPlayer(8), True)
+# game.playOneGame(HumanPlayer(8), MinimaxAlphaBetaPlayer(8, 6), True)
+# print("------------------------------------------------------------")
 # game.playOneGame(MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
-print("------------------------------------------------------------")
-game.playNGames(3, MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
-print("------------------------------------------------------------")
-game.playNGames(3, MinimaxPlayer(8, 4), RandomPlayer(8), False)
+# # game.playOneGame(MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
+# print("------------------------------------------------------------")
+# game.playNGames(3, MinimaxAlphaBetaPlayer(8, 4), RandomPlayer(8), False)
+# print("------------------------------------------------------------")
+# game.playNGames(3, MinimaxPlayer(8, 4), RandomPlayer(8), False)
